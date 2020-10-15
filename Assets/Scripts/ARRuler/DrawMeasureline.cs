@@ -12,12 +12,13 @@ public class DrawMeasureline : MonoBehaviour
 	private List<GameObject> m_TargetList = new List<GameObject>();
 
     private Material m_DrawMaterial;
+    private Texture2D m_Dottedline;
     private Material m_NormalMaterial;
     private bool m_DrawComplete = false;
 
     public static DrawMeasureline Create()
 	{
-        DrawMeasureline drawline = new GameObject().AddComponent<DrawMeasureline>();
+        DrawMeasureline drawline = new GameObject("Measureline").AddComponent<DrawMeasureline>();
 		return drawline;
 	}
 
@@ -29,10 +30,12 @@ public class DrawMeasureline : MonoBehaviour
     {
         m_ARCamera = GameObject.Find("AR Camera").GetComponent<Camera>();
 
-        //这里设置您正在绘制的线条样式
-        m_DrawMaterial = Resources.Load<Material>("Materials/DrawMaterial");
-        //这里设置您绘制完成后的线条样式
-        m_NormalMaterial = Resources.Load<Material>("Materials/NormalMaterial");
+        m_Dottedline = Resources.Load<Texture2D>("Textures/dottedline");
+        m_DrawMaterial = new Material(Shader.Find("GUI/Text Shader"));
+        if (m_Dottedline != null) m_DrawMaterial.mainTexture = m_Dottedline;
+        m_DrawMaterial.color = Color.green;
+        m_NormalMaterial = new Material(Shader.Find("Unlit/Color"));
+
         m_LineRender = gameObject.AddComponent<LineRenderer>();
         m_LineRender.enabled = false;
         if (m_DrawMaterial != null) m_LineRender.material = m_DrawMaterial;
@@ -92,9 +95,9 @@ public class DrawMeasureline : MonoBehaviour
         if (m_LinePoints.Count >= 2)
         {
             float dis = (m_LinePoints[0] - m_LinePoints[1]).magnitude;
-            SetLineMaterial(dis);
+            SetDrawMaterial(dis);
 
-             Vector3 center=(m_LinePoints[0] + m_LinePoints[1]) / 2;
+            Vector3 center=(m_LinePoints[0] + m_LinePoints[1]) / 2;
             float centerDis=(m_ARCamera.transform.position- center).magnitude;
             SetLineSize(centerDis);
         }
@@ -103,26 +106,21 @@ public class DrawMeasureline : MonoBehaviour
         m_LineRender.enabled = true;
     }
 
-    /// <summary>
-    /// 设置线条材质
-    /// </summary>
-    /// <param name="distance"></param>
-    private void SetLineMaterial(float distance)
+    /// <summary>根据距离设置材质大小</summary>
+    private void SetDrawMaterial(float distance)
     {
-        float value = distance*50f;
+        if (m_Dottedline == null) return;
+        float value = distance * 100f;
         m_DrawMaterial.SetTextureScale("_MainTex", new Vector2(value, 1));
     }
 
-    /// <summary>
-    /// 设置线条大小
-    /// </summary>
-    /// <param name="distance"></param>
+    /// <summary>设置线条大小</summary>
     private void SetLineSize(float distance)
     {
         float size = distance * 0.0035f;
         size = Mathf.Clamp(size, 0.0018f, 10f);
 
-        if (!m_DrawComplete) size *= 2;
+        if (!m_DrawComplete && m_Dottedline != null) size *= 3;
 
         m_LineRender.startWidth = size;
         m_LineRender.endWidth = size;
