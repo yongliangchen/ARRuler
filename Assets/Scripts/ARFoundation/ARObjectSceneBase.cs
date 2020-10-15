@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.XR.ARFoundation;
 using System;
 using System.Collections.Generic;
 using UnityEngine.XR.ARSubsystems;
+using UnityEngine.XR.ARFoundation;
 
 /// <summary>AR物体场景的基类</summary>
 public class ARObjectSceneBase : MonoBehaviour
@@ -20,7 +20,7 @@ public class ARObjectSceneBase : MonoBehaviour
     /// <summary>错误事件</summary>
     public Action<string> onErrorEvent = null;
     /// <summary>设备是否支持AR功能</summary>
-    public bool isSupportAR = false;
+    public bool isSupportAR { get; private set; } = false;
 
     private static List<ARRaycastHit> Hits = new List<ARRaycastHit>();
 
@@ -47,6 +47,12 @@ public class ARObjectSceneBase : MonoBehaviour
     private void Update()
     {
         OnUpdate();
+    }
+
+    private void OnDestroy()
+    {
+        planeManager.planesChanged -= OnPlanesChanged;
+        OnDispose();
     }
 
     /// <summary>添加脚本</summary>
@@ -88,53 +94,61 @@ public class ARObjectSceneBase : MonoBehaviour
         yield return ARSession.CheckAvailability();
 
         //当前设备不支持AR功能
-        if (ARSession.state == ARSessionState.Unsupported) { Unsupported(); }
+        if (ARSession.state == ARSessionState.Unsupported) { OnUnsupported(); }
         else
         {
             //设备支持 AR，但需要安装相应软件(这里指手机端的 ARCore 或者 ARKit)
             if (ARSession.state == ARSessionState.NeedsInstall) { yield return ARSession.Install(); }
 
             isSupportAR = true;
-            InitARFinish();
+            OnInitARFinish();
         }
     }
 
     public virtual void OnAwake() { }
     public virtual void OnStart() { }
     public virtual void OnUpdate() { }
+    public virtual void OnDispose() { }
 
     /// <summary>初始化AR完成</summary>
-    public virtual void InitARFinish()
+    public virtual void OnInitARFinish()
     {
-        //UIManager.Instance.OpenUIForms(EnumUIFormType.FindPanelUIForm);
+        planeManager.planesChanged += OnPlanesChanged;
     }
 
     /// <summary>当前设备不支持AR功能</summary>
-    public virtual void Unsupported() { }
+    public virtual void OnUnsupported() { }
+
+    /// <summary>平面识别发生改变</summary>
+    public virtual void OnPlanesChanged(ARPlanesChangedEventArgs obj){ }
 
     /// <summary>
     /// 从屏幕触摸位置发射一条射线
     /// </summary>
-    /// <param name="pose">返回姿态信息</param>
-    public void TouchRaycast(Action<Pose> pose)
+    /// <param name="result">返回结果</param>
+    public void TouchRaycast(Action<bool, Pose> result)
     {
         if (Input.touchCount == 0) return;
         var touch = Input.GetTouch(0);
         if (touch.phase != TouchPhase.Began) return;
 
-        Raycast(touch.position, pose);
+        Raycast(touch.position, result);
     }
 
     /// <summary>
     /// 从指定位置发射一条射线
     /// </summary>
     /// <param name="ps">发射射线的位置</param>
-    /// <param name="pose">返回姿态信息</param>
-    public void Raycast(Vector2 ps, Action<Pose> pose)
+    /// <param name="result">返回结果</param>
+    public void Raycast(Vector2 ps, Action<bool,Pose> result)
     {
         if (aRRaycastManager.Raycast(ps, Hits, TrackableType.PlaneWithinPolygon | TrackableType.PlaneWithinBounds))
         {
-            if (pose != null) pose(Hits[0].pose);
+            if (result != null) result(true,Hits[0].pose);
+        }
+        else
+        {
+            if (result != null) result(false, new Pose());
         }
     }
 

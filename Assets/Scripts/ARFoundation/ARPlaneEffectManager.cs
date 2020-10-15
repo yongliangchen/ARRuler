@@ -7,30 +7,10 @@ public class ARPlaneEffectManager : MonoBehaviour
     private ARPlaneManager m_ARPlaneManager = null;
     private Color m_DefaultPlaneColor = Color.white;
     private Color m_TransparentPlaneColor = new Color(255f / 255f, 255f / 255f, 255f / 255f, 0);
-    private bool isPlaneChanged = false;
-
+   
     private void Awake()
     {
         m_ARPlaneManager = FindObjectOfType<ARPlaneManager>();
-        m_ARPlaneManager.planesChanged += M_ARPlaneManager_planesChanged;
-    }
-
-    private void OnDestroy()
-    {
-        m_ARPlaneManager.planesChanged -= M_ARPlaneManager_planesChanged;
-    }
-
-    /// <summary>
-    /// 平面改变事件
-    /// </summary>
-    /// <param name="obj"></param>
-    private void M_ARPlaneManager_planesChanged(ARPlanesChangedEventArgs obj)
-    {
-        if (isPlaneChanged) return;
-        //UIManager.Instance.CloseUIForms(EnumUIFormType.FindPanelUIForm);
-        //UIManager.Instance.OpenUIForms(EnumUIFormType.CreateModelsPromptUIForm);
-
-        isPlaneChanged = true;
     }
 
     /// <summary>
