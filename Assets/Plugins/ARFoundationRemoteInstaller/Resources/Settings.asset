@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd607c3f010ab45a29ecfcf8d5a898ef, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: 
-  ARCompanionAppIP: 192.168.80.73
+  ARCompanionAppIP: 192.168.0.101
   port: 44819
   arCompanionSettings:
     maxOutgoingMessages: 2

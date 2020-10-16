@@ -126,7 +126,7 @@ public class ARObjectSceneBase : MonoBehaviour
     /// 从屏幕触摸位置发射一条射线
     /// </summary>
     /// <param name="result">返回结果</param>
-    public void TouchRaycast(Action<bool, Pose> result)
+    public void TouchRaycast(Action<bool, ARRaycastHit> result)
     {
         if (Input.touchCount == 0) return;
         var touch = Input.GetTouch(0);
@@ -140,15 +140,15 @@ public class ARObjectSceneBase : MonoBehaviour
     /// </summary>
     /// <param name="ps">发射射线的位置</param>
     /// <param name="result">返回结果</param>
-    public void Raycast(Vector2 ps, Action<bool,Pose> result)
+    public void Raycast(Vector2 ps, Action<bool, ARRaycastHit> result)
     {
         if (aRRaycastManager.Raycast(ps, Hits, TrackableType.PlaneWithinPolygon | TrackableType.PlaneWithinBounds))
         {
-            if (result != null) result(true,Hits[0].pose);
+            if (result != null) result(true,Hits[0]);
         }
         else
         {
-            if (result != null) result(false, new Pose());
+            if (result != null) result(false, new ARRaycastHit());
         }
     }
 

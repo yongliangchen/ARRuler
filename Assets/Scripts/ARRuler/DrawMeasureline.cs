@@ -110,7 +110,7 @@ public class DrawMeasureline : MonoBehaviour
     private void SetDrawMaterial(float distance)
     {
         if (m_Dottedline == null) return;
-        float value = distance * 100f;
+        float value = distance * 50;
         m_DrawMaterial.SetTextureScale("_MainTex", new Vector2(value, 1));
     }
 
@@ -120,7 +120,7 @@ public class DrawMeasureline : MonoBehaviour
         float size = distance * 0.0035f;
         size = Mathf.Clamp(size, 0.0018f, 10f);
 
-        if (!m_DrawComplete && m_Dottedline != null) size *= 3;
+        if (!m_DrawComplete && m_Dottedline != null) size *= 2;
 
         m_LineRender.startWidth = size;
         m_LineRender.endWidth = size;

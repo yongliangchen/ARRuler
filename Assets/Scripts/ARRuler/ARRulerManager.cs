@@ -16,6 +16,8 @@ public class ARRulerManager : ARObjectSceneBase
     private Button m_BtnTakePictures;
     /// <summary>删除锚点按钮</summary>
     private Button m_BtnDelete;
+    /// <summary>撤销按钮</summary>
+    private Button m_BtnRevoke;
     /// <summary>查找平面面板</summary>
     private GameObject m_FindPanelPanel;
     private bool isPlaneChanged = false;
@@ -32,23 +34,35 @@ public class ARRulerManager : ARObjectSceneBase
     public override void OnAwake()
     {
         base.OnAwake();
+
         m_ScreenCenter = new Vector2(Screen.width / 2, Screen.height / 2);
+
         m_TakeAim = Instantiate(Resources.Load("Prefabs/TakeAim") as GameObject,transform);
         m_TakeAim.name = "TakeAim";
         m_TakeAim.SetActive(false);
 
         m_AnchorParent = new GameObject("AnchorParent");
         m_AnchorParent.transform.parent = transform;
+
         m_UIRoot = GameObject.Find("UIRoot");
         m_ButtonsPanel = m_UIRoot.transform.Find("ButtonsPanel").gameObject;
         m_FindPanelPanel= m_UIRoot.transform.Find("FindPanelPanel").gameObject;
+
         m_BtnAdd = m_ButtonsPanel.transform.Find("BtnAdd").GetComponent<Button>();
         m_BtnAdd.onClick.AddListener(CreateAnchor);
         m_BtnAdd.interactable = false;
+
         m_BtnTakePictures = m_ButtonsPanel.transform.Find("BtnTakePictures").GetComponent<Button>();
+        m_BtnTakePictures.interactable = false;
+
         m_BtnDelete = m_ButtonsPanel.transform.Find("BtnDelete").GetComponent<Button>();
         m_BtnDelete.onClick.AddListener(ClearAnchor);
         m_BtnDelete.interactable = false;
+
+        m_BtnRevoke = m_ButtonsPanel.transform.Find("BtnRevoke").GetComponent<Button>();
+        m_BtnRevoke.onClick.AddListener(RevokeAnchor);
+        m_BtnRevoke.interactable = false;
+
         m_ButtonsPanel.SetActive(false);
         m_FindPanelPanel.SetActive(false);
     }
@@ -80,17 +94,30 @@ public class ARRulerManager : ARObjectSceneBase
     }
 
     /// <summary>更新瞄准器的位置信息</summary>
-    private void UpdateTakeAimPosition(bool hit, Pose pose)
+    private void UpdateTakeAimPosition(bool hit, ARRaycastHit aRRaycastHit)
     {
         m_TakeAim.SetActive(hit);
         m_BtnAdd.interactable = hit;
-        if (hit) m_TakeAim.transform.position = pose.position;
+        m_BtnTakePictures.interactable = hit;
+        if (hit)
+        {
+            m_TakeAim.transform.position = aRRaycastHit.pose.position;
+            m_TakeAim.transform.rotation = aRRaycastHit.pose.rotation;
+
+           Vector3 size = Vector3.one;
+            float value = 1;
+            if (aRRaycastHit.distance < 1) value = 3.3f;
+            else if (aRRaycastHit.distance < 2) value = 4;
+            else value = aRRaycastHit.distance * 2;
+            m_TakeAim.transform.localScale = size* value;
+        }
     }
 
     /// <summary>创建锚点</summary>
     private void CreateAnchor()
     {
         m_BtnDelete.interactable = true;
+        m_BtnRevoke.interactable = true;
         GameObject item = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         item.transform.parent = m_AnchorParent.transform;
         item.transform.localScale = Vector3.one * 0.006f;
@@ -120,10 +147,35 @@ public class ARRulerManager : ARObjectSceneBase
         }
     }
 
+    /// <summary>撤销锚点</summary>
+    private void RevokeAnchor()
+    {
+        if (m_ListDrawline != null && m_ListDrawline.Count > 0)
+        {
+            m_ListDrawline[m_ListDrawline.Count - 1].Delete();
+            m_ListDrawline.RemoveAt(m_ListDrawline.Count - 1);
+        }
+
+        if (m_ListPoint != null && m_ListPoint.Count > 1)
+        {
+            Destroy(m_ListPoint[m_ListPoint.Count - 1]);
+            Destroy(m_ListPoint[m_ListPoint.Count - 2]);
+            m_ListPoint.RemoveAt(m_ListPoint.Count - 1);
+            m_ListPoint.RemoveAt(m_ListPoint.Count - 1);
+        }
+
+        if (m_ListDrawline.Count < 1 || m_ListPoint.Count < 1)
+        {
+            m_BtnDelete.interactable = false;
+            m_BtnRevoke.interactable = false;
+        }
+    }
+
     /// <summary>删除锚点</summary>
     private void ClearAnchor()
     {
         m_BtnDelete.interactable = false;
+        m_BtnRevoke.interactable = false;
 
         if (m_ListDrawline != null && m_ListDrawline.Count > 0)
         {
