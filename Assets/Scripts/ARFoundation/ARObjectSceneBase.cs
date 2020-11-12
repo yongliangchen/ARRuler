@@ -39,15 +39,8 @@ public class ARObjectSceneBase : MonoBehaviour
         OnAwake();
     }
 
-    private void Start()
-    {
-        OnStart();
-    }
-
-    private void Update()
-    {
-        OnUpdate();
-    }
+    private void Start() { OnStart(); }
+    private void Update() { OnUpdate(); }
 
     private void OnDestroy()
     {
@@ -72,19 +65,19 @@ public class ARObjectSceneBase : MonoBehaviour
             GameObject aRDefaultPlane = Resources.Load<GameObject>("Prefabs/AR Feathered Plane Fade");
             planeManager.planePrefab = aRDefaultPlane;
         }
- 
+
         //添加射线检测
         aRRaycastManager = FindObjectOfType<ARRaycastManager>();
         if (aRRaycastManager == null)
         {
-            aRRaycastManager=m_ARSessionOrigin.AddComponent<ARRaycastManager>();
+            aRRaycastManager = m_ARSessionOrigin.AddComponent<ARRaycastManager>();
         }
 
         //添加AR平面特效管理
         planeEffectManager = FindObjectOfType<ARPlaneEffectManager>();
-        if(planeEffectManager==null)
+        if (planeEffectManager == null)
         {
-            planeEffectManager= m_ARSessionOrigin.AddComponent<ARPlaneEffectManager>();
+            planeEffectManager = m_ARSessionOrigin.AddComponent<ARPlaneEffectManager>();
         }
     }
 
@@ -120,7 +113,7 @@ public class ARObjectSceneBase : MonoBehaviour
     public virtual void OnUnsupported() { }
 
     /// <summary>平面识别发生改变</summary>
-    public virtual void OnPlanesChanged(ARPlanesChangedEventArgs obj){ }
+    public virtual void OnPlanesChanged(ARPlanesChangedEventArgs obj) { }
 
     /// <summary>
     /// 从屏幕触摸位置发射一条射线
@@ -144,7 +137,7 @@ public class ARObjectSceneBase : MonoBehaviour
     {
         if (aRRaycastManager.Raycast(ps, Hits, TrackableType.PlaneWithinPolygon | TrackableType.PlaneWithinBounds))
         {
-            if (result != null) result(true,Hits[0]);
+            if (result != null) result(true, Hits[0]);
         }
         else
         {

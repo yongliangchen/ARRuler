@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>对象上面画线</summary>
 public class ObjectDrawline : MonoBehaviour
 {
 
-    private float lineSize = 0.2f;
+    private float lineSize = 0.1f;
     public Material material;
 
     private LineRenderer lineRender;
