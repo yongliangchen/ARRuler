@@ -32,9 +32,11 @@ public class DrawMeasureline : MonoBehaviour
 
         m_Dottedline = Resources.Load<Texture2D>("Textures/dottedline");
         m_DrawMaterial = new Material(Shader.Find("GUI/Text Shader"));
+        m_DrawMaterial.renderQueue = 2998;
         if (m_Dottedline != null) m_DrawMaterial.mainTexture = m_Dottedline;
         m_DrawMaterial.color = Color.green;
-        m_NormalMaterial = new Material(Shader.Find("Unlit/Color"));
+        m_NormalMaterial = new Material(Shader.Find("GUI/Text Shader"));
+        m_NormalMaterial.renderQueue = 2998;
 
         m_LineRender = gameObject.AddComponent<LineRenderer>();
         m_LineRender.enabled = false;

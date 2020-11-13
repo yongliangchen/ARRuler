@@ -11,6 +11,7 @@
  *
  */
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,6 +24,8 @@ public class DrawManager : MonoBehaviour
     private List<GameObject> m_ListPoint = new List<GameObject>();
     private List<DrawMeasureline> m_ListDrawline = new List<DrawMeasureline>();
     private Transform m_AnchorParent;
+
+    private List<DistanceLabel> distanceLabels = new List<DistanceLabel>();
 
     private void Start()
     {
@@ -55,12 +58,21 @@ public class DrawManager : MonoBehaviour
             m_ListDrawline.Add(drawline);
 
             item.GetComponent<Renderer>().material.color = Color.green;
+
+            GameObject label = new GameObject(GetTimeStampToMilliseconds().ToString());
+            DistanceLabel distanceLabel = label.AddComponent<DistanceLabel>();
+            distanceLabel.m_StartObject = item;
+            distanceLabel.m_EndObject = m_TakeAim;
+            distanceLabels.Add(distanceLabel);
         }
         else
         {
             m_ListDrawline[m_ListDrawline.Count - 1].Remove(m_TakeAim);
             m_ListDrawline[m_ListDrawline.Count - 1].Add(item);
             m_ListDrawline[m_ListDrawline.Count - 1].DrawComplete();
+
+            distanceLabels[distanceLabels.Count - 1].m_EndObject = item;
+            distanceLabels[distanceLabels.Count - 1].DrawComplete();
 
             m_ListPoint[m_ListPoint.Count - 1].GetComponent<Renderer>().material.color = Color.white;
             m_ListPoint[m_ListPoint.Count - 2].GetComponent<Renderer>().material.color = Color.white;
@@ -87,6 +99,12 @@ public class DrawManager : MonoBehaviour
             m_ListPoint.RemoveAt(m_ListPoint.Count - 1);
         }
 
+        if (distanceLabels!=null && distanceLabels.Count>0)
+        {
+            Destroy(distanceLabels[distanceLabels.Count - 1].gameObject);
+            distanceLabels.RemoveAt(distanceLabels.Count - 1);
+        }
+
         SetDeleteButtonInteractable();
         SetRevokeButtonInteractable();
     }
@@ -106,6 +124,12 @@ public class DrawManager : MonoBehaviour
             m_ListPoint.Clear();
         }
 
+        if (distanceLabels != null && distanceLabels.Count > 0)
+        {
+            for (int i = distanceLabels.Count - 1; i >= 0; i--) { Destroy(distanceLabels[i].gameObject); }
+            distanceLabels.Clear();
+        }
+
         SetDeleteButtonInteractable();
         SetRevokeButtonInteractable();
     }
@@ -120,5 +144,12 @@ public class DrawManager : MonoBehaviour
     private void SetRevokeButtonInteractable()
     {
         ARRulerSceneManager.Instance.uIManager.RevokeButtonInteractable(m_ListPoint != null && m_ListPoint.Count > 0);
+    }
+
+    /// <summary>获取毫秒级别时间戳（13位）</summary>
+    public static long GetTimeStampToMilliseconds()
+    {
+        TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+        return Convert.ToInt64(ts.TotalMilliseconds);
     }
 }

@@ -22,8 +22,6 @@ public class ARRulerSceneManager : MonoSingleton<ARRulerSceneManager>
     public ARRulerFoundtion aRRulerFoundtion { get; private set; }
     /// <summary>UI管理类</summary>
     public UIManager uIManager { get; private set; }
-    /// <summary>标签管理类</summary>
-    public LabelsManager labelsManager { get; private set; }
     /// <summary>绘制管理</summary>
     public DrawManager drawManager { get; private set; }
 
@@ -40,9 +38,6 @@ public class ARRulerSceneManager : MonoSingleton<ARRulerSceneManager>
 
         uIManager = FindObjectOfType<UIManager>();
         if (uIManager == null) uIManager = gameObject.AddComponent<UIManager>();
-
-        labelsManager = FindObjectOfType<LabelsManager>();
-        if (labelsManager == null) labelsManager = gameObject.AddComponent<LabelsManager>();
 
         drawManager = FindObjectOfType<DrawManager>();
         if (drawManager == null) drawManager = gameObject.AddComponent<DrawManager>();
